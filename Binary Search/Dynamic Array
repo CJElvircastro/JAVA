@@ -1,0 +1,167 @@
+//Carlos Elvir
+package Sandbox;
+
+import java.io.*;
+import java.util.*;
+
+/**
+ * PsalmsReaderMain class - Template for Assignment-5
+ * @author Carlos Elvir
+ *
+ */
+public class PsalmReaderSandBox {
+	static ArrayList<String> words = new ArrayList<String>();
+	static ArrayList<Integer> count = new ArrayList<Integer>();
+	static int lastIndex = 0;
+	static long compareStringCount = 0;
+	static long moveStringCount = 0;
+	//changing the static array to dynamic by the code you provided
+
+	/**
+	 * addWordToList - add word to list or increment counter
+	 * @param inWord - the word to add to the list
+	 * @return number of words in the list
+	 */
+	static int addWordToList(String inWord) {
+		boolean uniqueWord = false;
+		
+		// Search for word, set boolean and increment count if found
+		for (int i = 0; i < lastIndex; i++) {
+			compareStringCount++;
+			if (inWord.compareTo(words.get(i)) == 0) {
+				uniqueWord = true;
+				count.set(i, count.get(i) + 1); 
+				break;
+			}
+		}
+		// If word not found in the loop above, add it to list bottom
+		if (!uniqueWord) {
+			moveStringCount++;
+			words.add(lastIndex, String.valueOf(inWord));
+			count.add(lastIndex, 1);
+			lastIndex += 1;
+		}
+		return lastIndex;
+	}
+	
+	
+	/**
+	 * addWordToListSorted - add word to sorted list or increment counter
+	 * @param inWord - the word to add to the list
+	 * @return number of words in the list
+	 */
+	static int addWordToSortedList(String inWord) { //Need to change the Add word to list to Add Word toSorted List in the main function.
+	//The binary search is mostly getting rid of my unique word not found and the insertIndex
+		boolean uniqueWord = false; //Same variable name I used last time
+		//Binary Search code that is mostly taken out of zybooks
+		int mid = 0;
+		int low = 0;
+		int high = lastIndex - 1;
+		//Instead of the booleans, we use the int defined as high, mid and low given by zybooks.
+		while (high >= low) {
+			mid = (high + low) / 2;
+			compareStringCount++;
+			int difference = inWord.compareTo(words.get(mid));
+			if (difference > 0) {
+				low = mid + 1;
+			} else
+			if (difference < 0) {
+				high = mid - 1;
+			} else {
+				uniqueWord = true;
+				count.set(mid, count.get(mid) + 1);
+				break;
+			}
+			
+		// Search for word, set boolean and increment count if found
+		// In Part #2, convert the linear search to a binary search
+		}
+		// If word not found in the loop above, add it to sorted list
+		if (!uniqueWord) { //Almost same as in linear search but we delete all the Insert Index part
+			words.add(lastIndex, "");
+			count.add(lastIndex, 0);
+			for(int N = lastIndex; N > low; N--) {
+						moveStringCount++;
+						words.set(N, words.get(N - 1));
+						count.set(N, count.get(N - 1)); //The solution you gave in class but different variable just in case.
+					}
+					moveStringCount++;
+					words.set(low, String.valueOf(inWord));
+					count.set(low, 1);
+					lastIndex += 1; 
+				
+			}
+			// In part #1, build an algorithm to maintain sorted order
+		return lastIndex;
+}
+	
+	/**
+	 * printWordList - dump the list if count > inMinimum
+	 */
+	static void printWordList(int inMinimum) {
+		// Your code goes here
+		System.out.println("Total unique words in the file: " + lastIndex);
+		System.out.println("The words were compared a total of " + compareStringCount + " times");
+		System.out.println("The program moved words from their positions a total of: " + moveStringCount);
+		System.out.println("The words that repeat more than " + inMinimum + " times are: "); //I changed my statement to make it easier to modify instead of keeping it fixed on "thousand times" 
+		for (int i = 0; i < lastIndex; i++) {
+			if (count.get(i) >= inMinimum) {
+			System.out.println("'" + words.get(i) + "'" + " Repeats " + count.get(i) + " times");
+		}
+	}
+}
+		
+	/**
+	 * getReference - Parse and return only the Psalms reference
+	 * @param inLine - the line to parse on tab delimiter
+	 * @return left half of tab delimited string
+	 */
+	static String getReference(String inLine) {
+		String[] ref = inLine.split("\t");
+		return ref[0];
+	}
+
+	/**
+	 * getVerse - Parse and return only the Psalms verse
+	 * @param inLine - the line to parse on tab delimiter
+	 * @return right half of tab delimited string
+	 */
+	static String getVerse(String inLine) {
+		String[] ver = inLine.split("\t");
+		return ver[1];
+	}
+
+	/**
+	 * PsalmsReaderMain main() - Template for Assignment-5
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		try {
+			// Open the required text file for sequential read
+			Scanner inputFile =
+					new Scanner (new File("C:\\Users\\elvir\\bible-complete10.txt"));
+			// Check for EOF, read the next line, and display it
+			while (inputFile.hasNextLine()) {
+				String inLine, verse;
+				String[] verseParsed;
+				
+				inLine = inputFile.nextLine();
+				verse = getVerse(inLine);
+				verseParsed = verse.split("[ :;,.'!?()-]+");
+
+				for (String s: verseParsed) {
+					addWordToSortedList(s.toLowerCase());
+					//addWordToSortedList(s.toLowerCase());
+				}
+			}
+			// Close the required file when EOF is reached
+			inputFile.close();
+			printWordList(10000);
+		} // END try
+		catch (Exception e) {
+			// All Exceptions come here for graceful termination
+			System.out.println("PsalmsReaderMain Error: " + e);
+		} // END catch
+	} // END main
+} // END class
+
